@@ -6,7 +6,7 @@ class start extends Phaser.Scene {
         this.load.path = './assets/';
     }
     create() {
-
+        this.add.text(640, 360, "Core GamePlay");
     }
     update() {
 
