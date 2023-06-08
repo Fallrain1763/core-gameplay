@@ -1,3 +1,6 @@
+const KEY = 0;
+const items = [false];
+
 class LevelScene extends Phaser.Scene {
     constructor(key) {
         super(key);
@@ -49,22 +52,85 @@ class L0 extends LevelScene {
         super('L0');
     }
     preload() {
-        this.load.path = './assets/';
-        this.load.image('bg0','/Level0/level0_background.png');
+        this.load.path = './assets/Level0/';
+		this.load.image('background','/level0_background.png');
+		this.load.image('unlocked_door','/unlockeddoor.png');
+		this.load.image('locked_door','/door.png');
+		this.load.image('key','/key.png');
+		this.load.image('arrow','/arrowUI.png');
 
+        this.load.path = './assets/Sound/';
+        this.load.audio('blop_sound', '/blop_sound_effect.mp3');
+        this.load.audio('door_open_sound', '/door_open_sound_effect.mp3');
     }
     onEnter() {
-        this.add.image(480, 360, 'bg0');
-        
+        this.add.image(480, 360, 'background');
+		this.add.image(320, 360, 'locked_door')
+			.setInteractive()
+            .on('pointerdown', () => {
+                if(items[KEY]) {
+                    this.sound.play('door_open_sound');
+					this.cameras.main.fade(1000, 0,0,0);
+                    this.time.delayedCall(1000, () => {
+                        this.scene.start('L1');
+                    });
+				}
+            });
+		this.add.image(640, 360, 'unlocked_door')
+			.setInteractive()
+            .on('pointerdown', () => {
+                this.sound.play('door_open_sound');
+                this.cameras.main.fade(1000, 0,0,0);
+                this.time.delayedCall(1000, () => {
+                    this.scene.start('L0_1');
+                });
+            });
 
-        this.input.on('pointerup', () => {
-            this.cameras.main.fade(1000, 0,0,0);
-			this.time.delayedCall(1000, () => this.scene.start('L1'));
-        });
+		if(items[KEY]) {
+			this.add.image(1050, 80, 'key');
+		}
     }
     update() {
 
     }
+}
+
+class L0_1 extends LevelScene {
+	constructor() {
+		super('L0_1');
+	}
+	preload() {
+		this.load.path = './assets/Level0/';
+	}
+	onEnter() {
+		this.add.image(480, 360, 'background');
+		this.add.image(600, 600, 'arrow')
+			.setInteractive()
+            .on('pointerdown', () => {
+                this.sound.play('blop_sound');
+                this.cameras.main.fade(1000, 0,0,0);
+                this.time.delayedCall(1000, () => {
+                    this.scene.start('L0');
+                });
+            });
+
+		if(items[KEY]) {
+			this.add.image(1050, 80, 'key');		
+		}
+		else {
+			let key = this.add.image(480, 360, 'key')
+			.setInteractive()
+            .on('pointerdown', () => {
+                key.destroy();
+                this.sound.play('blop_sound');
+				this.add.image(1050, 80, 'key')
+				items[KEY] = true;
+            });
+		}			
+	}
+	update() {
+    
+	}
 }
 
 class L1 extends LevelScene {
@@ -110,7 +176,7 @@ let config = {
     type: Phaser.WEBGL,
     width: 1280,
     height: 720,
-    scene: [start, L0, L1, L2]
+    scene: [start, L0, L0_1, L1, L2]
 }
 
 let game = new Phaser.Game(config);
