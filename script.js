@@ -5,35 +5,60 @@ class LevelScene extends Phaser.Scene {
     constructor(key) {
         super(key);
     }
+
     create() {
         this.cameras.main.setBackgroundColor('#808080');
         this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(1120, 0, 1120, 720));
-		this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 180, 1280, 180));
-		this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 360, 1280, 360));
-		this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 540, 1280, 540));
-
+        this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 180, 1280, 180));
+        this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 360, 1280, 360));
+        this.add.graphics().lineStyle(2, 0xffffff).strokeLineShape(new Phaser.Geom.Line(960, 540, 1280, 540));
         this.onEnter();
     }
-    update() {
 
+    update() {
     }
 
     onEnter() {
+    }
+}
 
+class UIScene extends Phaser.Scene {
+    constructor() {
+        super();
+    }
+    create() {
+        this.w = this.game.config.width;
+        this.h = this.game.config.height;
+        this.s = this.game.config.width * 0.01;
+        this.add.text(this.w - 3 * this.s, this.h - 3 * this.s, "📺")
+            .setStyle({ fontSize: `${2 * this.s}px` })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                if (this.scale.isFullscreen) {
+                    this.scale.stopFullscreen();
+                } else {
+                    this.scale.startFullscreen();
+                }
+            });
     }
 }
 
 class start extends Phaser.Scene {
     constructor() {
-        super('start');
+        super({ key: 'start' });
     }
     preload() {
         this.load.path = './assets/';
+        this.load.audio('music', 'Tchaikovsky_dance_of_the_sugar_plum_fairy.mp3');
     }
     create() {
         this.cameras.main.setBackgroundColor('#FFFFFF');
         this.add.text(640, 240, "Core Gameplay", { fontSize: 64, color: '#000000' }).setOrigin(0.5);
         this.add.text(640, 480, "Start Screen\nTap the screen to continue", { fontSize: 48, color: '#000000' }).setOrigin(0.5);
+
+        const music = this.sound.add('music', { loop: true });
+        music.play();
+        this.scene.add('UIScene', UIScene, true);
 
         this.input.on('pointerup', () => {
             this.cameras.main.fade(1000, 0,0,0);
@@ -44,7 +69,6 @@ class start extends Phaser.Scene {
     update() {
 
     }
-    
 }
 
 class L0 extends LevelScene {
@@ -174,8 +198,12 @@ class L2 extends LevelScene {
 
 let config = {
     type: Phaser.WEBGL,
-    width: 1280,
-    height: 720,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1280,
+        height: 720
+    },
     scene: [start, L0, L0_1, L1, L2]
 }
 
