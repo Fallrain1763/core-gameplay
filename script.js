@@ -1,5 +1,5 @@
+import items from './items.json' assert {type: 'json'};
 const KEY = 0;
-const items = [false];
 
 class LevelScene extends Phaser.Scene {
     constructor(key) {
@@ -52,6 +52,7 @@ class start extends Phaser.Scene {
         this.load.audio('music', 'Tchaikovsky_dance_of_the_sugar_plum_fairy.mp3');
     }
     create() {
+        console.log(items);
         this.cameras.main.setBackgroundColor('#FFFFFF');
         this.add.text(640, 240, "Core Gameplay", { fontSize: 64, color: '#000000' }).setOrigin(0.5);
         this.add.text(640, 480, "Start Screen\nTap the screen to continue", { fontSize: 48, color: '#000000' }).setOrigin(0.5);
@@ -92,7 +93,7 @@ class L0 extends LevelScene {
 		this.add.image(320, 360, 'locked_door')
 			.setInteractive()
             .on('pointerdown', () => {
-                if(items[KEY]) {
+                if(items[KEY].isOwn) {
                     this.sound.play('door_open_sound');
 					this.cameras.main.fade(1000, 0,0,0);
                     this.time.delayedCall(1000, () => {
@@ -109,9 +110,10 @@ class L0 extends LevelScene {
                     this.scene.start('L0_1');
                 });
             });
-
-		if(items[KEY]) {
-			this.add.image(1050, 80, 'key');
+        
+        // may replace with a display function later
+		if(items[KEY].isOwn) {
+			this.add.image(1050, 80, items[KEY].name);
 		}
     }
     update() {
@@ -138,17 +140,25 @@ class L0_1 extends LevelScene {
                 });
             });
 
-		if(items[KEY]) {
-			this.add.image(1050, 80, 'key');		
+		if(items[KEY].isOwn) {
+			this.add.image(1050, 80, items[KEY].name);		
 		}
 		else {
-			let key = this.add.image(480, 360, 'key')
+			let key = this.add.image(480, 360, items[KEY].name)
 			.setInteractive()
             .on('pointerdown', () => {
                 key.destroy();
                 this.sound.play('blop_sound');
-				this.add.image(1050, 80, 'key')
-				items[KEY] = true;
+				this.add.image(1050, 80, items[KEY].name)
+				items[KEY].isOwn = true;
+            });
+
+            this.tweens.add({
+                targets: key,
+                y: 330,
+                duration: 1000,
+                ease: 'Linear',
+                repeat: -1,
             });
 		}			
 	}
